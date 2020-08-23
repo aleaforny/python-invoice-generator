@@ -15,6 +15,7 @@ Code disclaimer
 - You can customize some of the class attribute, such as the date format on the invoice, locale or timezone.
 - The file payload is accessible via `response.content`, if the response status code is `200`.
 - Perhaps you noted also that the original API parameter `from` had to be changed to `sender` in this library. This is due to the fact that `from` can't be a parameter in Python as it's a **keyword**, but the setting is correctly renamed after being passed as a JSON string when calling the API.
+- Read Invoice Generator API docs for complete understanding of the API and the parameters available. **Not ALL paramaters have been tested with this API, so there can be some bugs!**
 
 How-to-use (By example)
 --------
