@@ -14,6 +14,7 @@ Code disclaimer
 - This is NOT a Python package, just a very small library at its early stage. I created it for my own use, but it can perhaps help some other time, and it can be improved in many ways, so feel free to input your additions!
 - You can customize some of the class attribute, such as the date format on the invoice, locale or timezone.
 - The file payload is accessible via `response.content`, if the response status code is `200`.
+- Perhaps you noted also that the original API parameter `from` had to be changed to `sender` in this library. This is due to the fact that `from` can't be a parameter in Python as it's a **keyword**, but the setting is correctly renamed after being passed as a JSON string when calling the API.
 
 How-to-use (By example)
 --------
