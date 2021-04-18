@@ -120,6 +120,9 @@ class InvoiceGenerator:
         response = requests.post(InvoiceGenerator.URL, json=json.loads(json_string), stream=True, headers={'Accept-Language': InvoiceGenerator.LOCALE})
         if response.status_code == 200:
             open(file_path, 'wb').write(response.content)
+        else:
+            raise Exception(f"Invoice download request returned the following message:{response.json()} Response code = {response.status_code} ")
+
 
     def set_template_text(self, template_parameter, value):
         """ If you want to change a default value for customising your invoice template, call this method """
