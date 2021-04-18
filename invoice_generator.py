@@ -157,4 +157,4 @@ class CustomField:
     def __init__(self, name, value):
         """ Object constructor """
         self.name = name
-        self.quantity = value
+        self.value = value
