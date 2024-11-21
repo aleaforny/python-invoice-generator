@@ -10,6 +10,7 @@ class InvoiceGenerator:
     """ API Object for Invoice-Generator tool - https://invoice-generator.com/ """
 
     URL = "https://invoice-generator.com"
+    API_KEY = "SET_YOUR_API_KEY_HERE"
     DATE_FORMAT = "%d %b %Y"
     LOCALE = "fr_FR"
     TIMEZONE = "Europe/Paris"
@@ -117,7 +118,7 @@ class InvoiceGenerator:
     def download(self, file_path):
         """ Directly send the request and store the file on path """
         json_string = self._to_json()
-        response = requests.post(InvoiceGenerator.URL, json=json.loads(json_string), stream=True, headers={'Accept-Language': InvoiceGenerator.LOCALE})
+        response = requests.post(InvoiceGenerator.URL, json=json.loads(json_string), stream=True, headers={'Accept-Language': InvoiceGenerator.LOCALE, 'Authorization': f'Bearer {self.API_KEY}'})
         if response.status_code == 200:
             open(file_path, 'wb').write(response.content)
         else:
