@@ -6,14 +6,31 @@ import locale
 from datetime import datetime
 
 
+class InvoiceClientConfig:
+    api_key: str
+    date_format: str
+    locale: str | None
+    timezone: str
+    endpoint_url: str
+
+    def __init__(
+        self,
+        api_key: str,
+        date_format: str = "%d %b %Y",
+        locale: str | None = None,
+        timezone: str = "Europe/Paris",
+        endpoint_url: str = "https://invoice-generator.com",
+    ):
+        self.api_key = api_key
+        self.date_format = date_format
+        self.locale = locale
+        self.timezone = timezone
+        self.endpoint_url = endpoint_url
+
+
 class InvoiceGenerator:
     """API Object for Invoice-Generator tool - https://invoice-generator.com/"""
 
-    URL = "https://invoice-generator.com"
-    API_KEY = "SET_YOUR_API_KEY_HERE"
-    DATE_FORMAT = "%d %b %Y"
-    LOCALE = "fr_FR"
-    TIMEZONE = "Europe/Paris"
     # Below are the default template parameters that can be changed (see https://github.com/Invoiced/invoice-generator-api/)
     TEMPLATE_PARAMETERS = [
         "header",
@@ -41,6 +58,7 @@ class InvoiceGenerator:
 
     def __init__(
         self,
+        config: InvoiceClientConfig,
         sender,
         to,
         logo=None,
@@ -51,7 +69,7 @@ class InvoiceGenerator:
         notes=None,
         terms=None,
         currency="USD",
-        date=datetime.now(tz=pytz.timezone(TIMEZONE)),
+        date=None,
         discounts=0,
         tax=0,
         shipping=0,
@@ -59,13 +77,14 @@ class InvoiceGenerator:
     ):
         """Object constructor"""
         self.logo = logo
+        self.config = config
         self.sender = sender
         self.to = to
         self.ship_to = ship_to
         self.number = number
         self.currency = currency
         self.custom_fields = []
-        self.date = date
+        self.date = datetime.now(tz=pytz.timezone(self.config.timezone))
         self.payment_terms = payments_terms
         self.due_date = due_date
         self.items = []
@@ -86,14 +105,12 @@ class InvoiceGenerator:
         We are also resetting the two list of Objects items and custom_fields so that it can be JSON serializable
         Finally, we are handling template customization with its dict
         """
-        locale.setlocale(locale.LC_ALL, InvoiceGenerator.LOCALE)
-        object_dict = self.__dict__
+        locale.setlocale(locale.LC_ALL, self.config.locale)
+        object_dict = self.__dict__.copy()
         object_dict["from"] = object_dict.get("sender")
-        object_dict["date"] = self.date.strftime(InvoiceGenerator.DATE_FORMAT)
+        object_dict["date"] = self.date.strftime(self.config.date_format)
         if object_dict["due_date"] is not None:
-            object_dict["due_date"] = self.due_date.strftime(
-                InvoiceGenerator.DATE_FORMAT
-            )
+            object_dict["due_date"] = self.due_date.strftime(self.config.date_format)
         object_dict.pop("sender")
         for index, item in enumerate(object_dict["items"]):
             object_dict["items"][index] = item.__dict__
@@ -102,6 +119,7 @@ class InvoiceGenerator:
         for template_parameter, value in self.template.items():
             object_dict[template_parameter] = value
         object_dict.pop("template")
+        object_dict.pop("config")
         return json.dumps(object_dict)
 
     def add_custom_field(self, name=None, value=None):
@@ -123,12 +141,12 @@ class InvoiceGenerator:
         """Directly send the request and store the file on path"""
         json_string = self._to_json()
         response = requests.post(
-            InvoiceGenerator.URL,
+            self.config.endpoint_url,
             json=json.loads(json_string),
             stream=True,
             headers={
-                "Accept-Language": InvoiceGenerator.LOCALE,
-                "Authorization": f"Bearer {self.API_KEY}",
+                "Accept-Language": self.config.locale,
+                "Authorization": f"Bearer {self.config.api_key}",
             },
         )
         if response.status_code == 200:
