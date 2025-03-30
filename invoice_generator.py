@@ -2,6 +2,7 @@ import requests
 import json
 import pytz
 import locale
+from tzlocal import get_localzone
 
 from datetime import datetime
 
@@ -18,7 +19,7 @@ class InvoiceClientConfig:
         api_key: str,
         date_format: str = "%d %b %Y",
         locale: str | None = None,
-        timezone: str = "Europe/Paris",
+        timezone: str = str(get_localzone()),
         endpoint_url: str = "https://invoice-generator.com",
     ):
         self.api_key = api_key
