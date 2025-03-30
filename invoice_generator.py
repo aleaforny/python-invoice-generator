@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 class InvoiceGenerator:
-    """ API Object for Invoice-Generator tool - https://invoice-generator.com/ """
+    """API Object for Invoice-Generator tool - https://invoice-generator.com/"""
 
     URL = "https://invoice-generator.com"
     API_KEY = "SET_YOUR_API_KEY_HERE"
@@ -39,22 +39,25 @@ class InvoiceGenerator:
         "notes_title",
     ]
 
-    def __init__(self, sender, to,
-                 logo=None,
-                 ship_to=None,
-                 number=None,
-                 payments_terms=None,
-                 due_date=None,
-                 notes=None,
-                 terms=None,
-                 currency="USD",
-                 date=datetime.now(tz=pytz.timezone(TIMEZONE)),
-                 discounts=0,
-                 tax=0,
-                 shipping=0,
-                 amount_paid=0,
-                 ):
-        """ Object constructor """
+    def __init__(
+        self,
+        sender,
+        to,
+        logo=None,
+        ship_to=None,
+        number=None,
+        payments_terms=None,
+        due_date=None,
+        notes=None,
+        terms=None,
+        currency="USD",
+        date=datetime.now(tz=pytz.timezone(TIMEZONE)),
+        discounts=0,
+        tax=0,
+        shipping=0,
+        amount_paid=0,
+    ):
+        """Object constructor"""
         self.logo = logo
         self.sender = sender
         self.to = to
@@ -85,67 +88,77 @@ class InvoiceGenerator:
         """
         locale.setlocale(locale.LC_ALL, InvoiceGenerator.LOCALE)
         object_dict = self.__dict__
-        object_dict['from'] = object_dict.get('sender')
-        object_dict['date'] = self.date.strftime(InvoiceGenerator.DATE_FORMAT)
-        if object_dict['due_date'] is not None:
-            object_dict['due_date'] = self.due_date.strftime(InvoiceGenerator.DATE_FORMAT)
-        object_dict.pop('sender')
-        for index, item in enumerate(object_dict['items']):
-            object_dict['items'][index] = item.__dict__
-        for index, custom_field in enumerate(object_dict['custom_fields']):
-            object_dict['custom_fields'][index] = custom_field.__dict__
+        object_dict["from"] = object_dict.get("sender")
+        object_dict["date"] = self.date.strftime(InvoiceGenerator.DATE_FORMAT)
+        if object_dict["due_date"] is not None:
+            object_dict["due_date"] = self.due_date.strftime(
+                InvoiceGenerator.DATE_FORMAT
+            )
+        object_dict.pop("sender")
+        for index, item in enumerate(object_dict["items"]):
+            object_dict["items"][index] = item.__dict__
+        for index, custom_field in enumerate(object_dict["custom_fields"]):
+            object_dict["custom_fields"][index] = custom_field.__dict__
         for template_parameter, value in self.template.items():
             object_dict[template_parameter] = value
-        object_dict.pop('template')
+        object_dict.pop("template")
         return json.dumps(object_dict)
 
     def add_custom_field(self, name=None, value=None):
-        """ Add a custom field to the invoice """
-        self.custom_fields.append(CustomField(
-            name=name,
-            value=value
-        ))
+        """Add a custom field to the invoice"""
+        self.custom_fields.append(CustomField(name=name, value=value))
 
     def add_item(self, name=None, quantity=0, unit_cost=0.0, description=None):
-        """ Add item to the invoice """
-        self.items.append(Item(
-            name=name,
-            quantity=quantity,
-            unit_cost=unit_cost,
-            description=description
-        ))
+        """Add item to the invoice"""
+        self.items.append(
+            Item(
+                name=name,
+                quantity=quantity,
+                unit_cost=unit_cost,
+                description=description,
+            )
+        )
 
     def download(self, file_path):
-        """ Directly send the request and store the file on path """
+        """Directly send the request and store the file on path"""
         json_string = self._to_json()
-        response = requests.post(InvoiceGenerator.URL, json=json.loads(json_string), stream=True, headers={'Accept-Language': InvoiceGenerator.LOCALE, 'Authorization': f'Bearer {self.API_KEY}'})
+        response = requests.post(
+            InvoiceGenerator.URL,
+            json=json.loads(json_string),
+            stream=True,
+            headers={
+                "Accept-Language": InvoiceGenerator.LOCALE,
+                "Authorization": f"Bearer {self.API_KEY}",
+            },
+        )
         if response.status_code == 200:
-            open(file_path, 'wb').write(response.content)
+            open(file_path, "wb").write(response.content)
         else:
-            raise Exception(f"Invoice download request returned the following message:{response.json()} Response code = {response.status_code} ")
-
+            raise Exception(
+                f"Invoice download request returned the following message:{response.json()} Response code = {response.status_code} "
+            )
 
     def set_template_text(self, template_parameter, value):
-        """ If you want to change a default value for customising your invoice template, call this method """
+        """If you want to change a default value for customising your invoice template, call this method"""
         if template_parameter in InvoiceGenerator.TEMPLATE_PARAMETERS:
             self.template[template_parameter] = value
         else:
-            raise ValueError("The parameter {} is not a valid template parameter. See docs.".format(template_parameter))
+            raise ValueError(
+                "The parameter {} is not a valid template parameter. See docs.".format(
+                    template_parameter
+                )
+            )
 
     def toggle_subtotal(self, tax="%", discounts=False, shipping=False):
-        """ Toggle lines of subtotal """
-        self.fields = {
-            "tax": tax,
-            "discounts": discounts,
-            "shipping": shipping
-        }
+        """Toggle lines of subtotal"""
+        self.fields = {"tax": tax, "discounts": discounts, "shipping": shipping}
 
 
 class Item:
-    """ Item object for an invoice """
+    """Item object for an invoice"""
 
     def __init__(self, name, quantity, unit_cost, description=""):
-        """ Object constructor """
+        """Object constructor"""
         self.name = name
         self.quantity = quantity
         self.unit_cost = unit_cost
@@ -153,9 +166,9 @@ class Item:
 
 
 class CustomField:
-    """ Custom Field object for an invoice """
+    """Custom Field object for an invoice"""
 
     def __init__(self, name, value):
-        """ Object constructor """
+        """Object constructor"""
         self.name = name
         self.value = value
