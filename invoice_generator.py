@@ -88,7 +88,7 @@ class InvoiceGenerator:
         self.custom_fields = []
         self.date = date or datetime.now(tz=pytz.timezone(self.config.timezone))
         self.payment_terms = payments_terms
-        self.due_date = due_date
+        self.due_date: datetime | None = due_date
         self.items = []
         self.fields = {"tax": "%", "discounts": False, "shipping": False}
         self.discounts = discounts
@@ -111,8 +111,9 @@ class InvoiceGenerator:
         object_dict = self.__dict__.copy()
         object_dict["from"] = object_dict.get("sender")
         object_dict["date"] = self.date.strftime(self.config.date_format)
-        if object_dict["due_date"] is not None:
-            object_dict["due_date"] = self.due_date.strftime(self.config.date_format)
+        object_dict["due_date"] = (
+            self.due_date.strftime(self.config.date_format) if self.due_date else None
+        )
         object_dict.pop("sender")
         for index, item in enumerate(object_dict["items"]):
             object_dict["items"][index] = item.__dict__
@@ -128,14 +129,20 @@ class InvoiceGenerator:
         """Add a custom field to the invoice"""
         self.custom_fields.append(CustomField(name=name, value=value))
 
-    def add_item(self, name=None, quantity=0, unit_cost=0.0, description=None):
+    def add_item(
+        self,
+        name: str | None = None,
+        quantity=0,
+        unit_cost=0.0,
+        description: str | None = None,
+    ):
         """Add item to the invoice"""
         self.items.append(
             Item(
                 name=name,
                 quantity=quantity,
                 unit_cost=unit_cost,
-                description=description,
+                description=description or "",
             )
         )
 
