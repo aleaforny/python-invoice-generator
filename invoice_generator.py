@@ -86,7 +86,7 @@ class InvoiceGenerator:
         self.number = number
         self.currency = currency
         self.custom_fields = []
-        self.date = datetime.now(tz=pytz.timezone(self.config.timezone))
+        self.date = date or datetime.now(tz=pytz.timezone(self.config.timezone))
         self.payment_terms = payments_terms
         self.due_date = due_date
         self.items = []
