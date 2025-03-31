@@ -2,6 +2,7 @@ import requests
 import json
 import pytz
 import locale
+from locale import getlocale
 from tzlocal import get_localzone
 
 from datetime import datetime
@@ -18,7 +19,7 @@ class InvoiceClientConfig:
         self,
         api_key: str,
         date_format: str = "%d %b %Y",
-        locale: str | None = None,
+        locale: str | None = getlocale()[0] or None,
         timezone: str = str(get_localzone()),
         endpoint_url: str = "https://invoice-generator.com",
     ):
@@ -141,14 +142,16 @@ class InvoiceGenerator:
     def download(self, file_path):
         """Directly send the request and store the file on path"""
         json_string = self._to_json()
+        headers = {
+            "Authorization": f"Bearer {self.config.api_key}",
+        }
+        if self.config.locale:
+            headers["Accept-Language"] = self.config.locale
         response = requests.post(
             self.config.endpoint_url,
             json=json.loads(json_string),
             stream=True,
-            headers={
-                "Accept-Language": self.config.locale,
-                "Authorization": f"Bearer {self.config.api_key}",
-            },
+            headers=headers,
         )
         if response.status_code == 200:
             open(file_path, "wb").write(response.content)
