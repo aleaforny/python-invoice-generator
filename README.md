@@ -21,10 +21,15 @@ How-to-use (By example)
 --------
 
 The code is documented and there are no different endpoints with this API so there are no so many methods.
-
-1) Create the `Invoice` object
+1) Create the `config` object
+```python
+config = InvoiceClientConfig(api_key="YOUR_API_KEY_HERE")
 ```
+
+2) Create the `Invoice` object
+```python
 invoice = InvoiceGenerator(
+    config=config,
     sender="Invoiced, Inc.",
     to="Parag",
     logo="https://invoiced.com/img/logo-invoice.png",
@@ -34,8 +39,8 @@ invoice = InvoiceGenerator(
 )
 ```
 
-2) Add one or several items to it
-```
+3) Add one or several items to it
+```python
 invoice.add_item(
     name="Starter plan",
     quantity=1,
@@ -48,13 +53,13 @@ invoice.add_item(
 )
 ```
 
-3) You can basically customise the object after hand (useful if you have to process things after generating the invoice but before actually sending it, perhaps for some async tasks...)
-```
+4) You can basically customise the object after hand (useful if you have to process things after generating the invoice but before actually sending it, perhaps for some async tasks...)
+```python
 invoice.toggle_subtotal(shipping=True)
 ```
 
-4) Finally download the file (this will actually call the API). It can be absolute or relative path. 
-```
+5) Finally download the file (this will actually call the API). It can be absolute or relative path. 
+```python
 invoice.download("my-awesome-invoice.pdf")
 ```
 
